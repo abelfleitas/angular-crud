@@ -12,7 +12,10 @@ export class PostService {
 
   constructor(private httpClient: HttpClient) { }
 
-  readAll(): Observable<any> {
+  get(): Observable<any> {
     return this.httpClient.get(baseURL);
+  }
+  getById(id: number): Observable<any> {
+    return this.httpClient.get(baseURL + '/' + id);
   }
 }

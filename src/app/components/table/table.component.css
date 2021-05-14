@@ -1,3 +1,8 @@
 table {
   width: 100%;
 }
+
+button.btnAction{
+ margin-right: 3rem;
+ border: 1px solid #1976d2;
+}

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import {Component, Inject} from '@angular/core';
+import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-dialog',
@@ -8,9 +8,10 @@ import {MatDialog} from '@angular/material/dialog';
 })
 export class DialogComponent  {
 
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialogRef<DialogComponent>,
+              @Inject(MAT_DIALOG_DATA) public message: string) { }
 
-  openDialog(): void {
-    this.dialog.open(DialogComponent);
+  onCloseDialog(): void {
+    this.dialog.close();
   }
  }

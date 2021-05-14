@@ -2,10 +2,65 @@
 
   <h2>Post List</h2>
 
-  <button mat-raised-button (click)="addColumn()"> Add column </button>
+  <mat-card>
+    <button mat-raised-button class="btnAction" (click)="addRow()">
+      <mat-icon aria-hidden="false" aria-label="icon plus">add</mat-icon>
+      Add
+    </button>
+    <button mat-raised-button class="btnAction" (click)="deleteRow()">
+      <mat-icon aria-hidden="false" aria-label="icon delete">delete</mat-icon>
+      Delete
+    </button>
+    <button mat-raised-button class="btnAction" (click)="updateRow()">
+      <mat-icon aria-hidden="false" aria-label="icon edit">edit</mat-icon>
+      Update
+    </button>
+  </mat-card>
+
+  <mat-card *ngIf="addForm">
+    <form  [formGroup]="postForm" (ngSubmit)="onSubmit()" novalidate>
+      <mat-form-field appearance="fill">
+        <mat-label>Title</mat-label>
+        <input matInput placeholder="Enter the tiltle post" autocomplete="off"
+             formControlName="title" id="title" name="title">
+        <mat-error *ngIf="postForm.hasError('required','title')">
+          This field is required
+        </mat-error>
+        <mat-error *ngIf="postForm.hasError('minLength','title')">
+          This field must be longer than 5 characters
+        </mat-error>
+      </mat-form-field>
+
+      <mat-divider [vertical]="true"></mat-divider>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Body</mat-label>
+        <textarea rows="3" matInput placeholder="Enter the body post"
+                    formControlName="body" id="body" name="title"></textarea>
+        <mat-error *ngIf="postForm.hasError('required','body')">
+          This field is required
+        </mat-error>
+        <mat-error *ngIf="postForm.hasError('minLength','body')">
+          This field must be longer than 5 characters
+        </mat-error>
+      </mat-form-field>
+
+      <mat-divider [vertical]="true" ></mat-divider>
+      <mat-divider [vertical]="true" ></mat-divider>
+
+      <button type="submit" mat-raised-button color="primary" class="btnAction">
+        <mat-icon aria-hidden="false" aria-label="icon save">check</mat-icon>
+        Save
+      </button>
+
+      <button mat-button color="primary" (click)="closeForm()">
+        Cancel
+      </button>
+
+    </form>
+  </mat-card>
 
   <div class="mat-elevation-z8">
-
     <mat-table class="post-table" [dataSource]="dataSource" matSort>
 
       <!-- Checkbox Column -->

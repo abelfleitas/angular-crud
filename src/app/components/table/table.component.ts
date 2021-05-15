@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild, OnDestroy} from '@angular/core';
 import { PostService } from 'src/app/services/post.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import {MatSort, MatSortable} from '@angular/material/sort';
 import {Post} from '../../models/post';
 import {SelectionModel} from '@angular/cdk/collections';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,7 +24,7 @@ const auxPost: Post[] = [
 })
 export class TableComponent implements OnInit, OnDestroy  {
   subscription: Subscription = new Subscription();
-  dataSource!: MatTableDataSource<Post>;
+  dataSource !: MatTableDataSource<Post>;
   displayedColumns: string[] = ['select', 'userId', 'id', 'title', 'body'];
   selection = new SelectionModel<Post>(false, []);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -46,10 +46,6 @@ export class TableComponent implements OnInit, OnDestroy  {
     this.isDisconnectNetwork = false;
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
   ngOnInit(): void {
     this.postService.get().subscribe(posts => {
         this.dataSource = new MatTableDataSource<Post>(posts);
@@ -64,6 +60,10 @@ export class TableComponent implements OnInit, OnDestroy  {
       this.isDisconnectNetwork = true;
       this.showErrorAlert(error.message);
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   onRowClicked(row: Post): void {
@@ -99,11 +99,15 @@ export class TableComponent implements OnInit, OnDestroy  {
         });
         dialogRef.afterClosed().subscribe(resp => {
           if (resp){
-            const index = this.dataSource.data.indexOf(this.selection.selected[0]);
-            this.dataSource.data.splice(index, 1);
-            this.dataSource._updateChangeSubscription();
-            this.selection.clear();
-            this.showSuccessAlert('Post has been delete');
+            if (this.isDisconnectNetwork){
+              const index = this.dataSource.data.indexOf(this.selection.selected[0]);
+              this.dataSource.data.splice(index, 1);
+              this.dataSource._updateChangeSubscription();
+              this.selection.clear();
+              this.showSuccessAlert('Post has been delete');
+            } else {
+              this.deletePostJsonPlaceholder(this.selection.selected[0]);
+            }
           }
         });
     } else {
@@ -136,20 +140,30 @@ export class TableComponent implements OnInit, OnDestroy  {
     const row = this.postForm.value;
     let msg = '';
     if (this.isEdit){
-      msg = 'the post has been updated';
-    }else {
-      const newPost = {userId: 1, id: this.dataSource.data.length + 1, title: row.title, body: row.title};
-      msg = 'the post has been added';
+      let post = this.selection.selected[0];
+      const newPost = {userId: post.userId, id: post.id, title: row.title, body: row.title};
+      if (this.isDisconnectNetwork){
+        msg = 'the post has been updated';
+        this.dataSource.data[this.dataSource.data.indexOf(post)]  = newPost;
+        this.dataSource._updateChangeSubscription();
+        this.showSuccessAlert('the post has been updated');
+        this.closeForm();
+      } else {
+        this.updatePostJsonPlaceholder(newPost);
+      }
+    } else {
+      const length = (this.dataSource.data.length + 1);
+      const newPost = {userId: 1, id: length, title: row.title, body: row.title};
       if (this.isDisconnectNetwork){
         this.dataSource.data.push(newPost);
+        msg = 'the post has been added';
+        this.dataSource._updateChangeSubscription();
+        this.showSuccessAlert(msg);
+        this.closeForm();
       } else {
         this.sendPostJsonPlaceholder(newPost);
       }
     }
-    this.dataSource._updateChangeSubscription();
-    this.showSuccessAlert(msg);
-    this.closeForm();
-    console.log(row);
   }
 
   showWarningAlert(msg: string): void {
@@ -165,5 +179,32 @@ export class TableComponent implements OnInit, OnDestroy  {
   }
 
   /** if data is remote, i do send post to Api */
-  sendPostJsonPlaceholder(post: Post): void {}
+  sendPostJsonPlaceholder(post: Post): void {
+    this.postService.sendPost(post).subscribe(post => {
+        this.dataSource.data.push(post);
+        this.dataSource._updateChangeSubscription();
+        this.showSuccessAlert('the post has been added');
+        this.closeForm();
+      });
+  }
+
+  /** if data is remote, i do send put to Api */
+  updatePostJsonPlaceholder(post: Post): void {
+    this.postService.updatePost(post).subscribe(obj => {
+      this.dataSource.data[this.dataSource.data.indexOf(post)]  = obj;
+      this.dataSource._updateChangeSubscription();
+      this.showSuccessAlert('the post has been updated');
+      this.closeForm();
+    });
+  }
+
+  /** if data is remote, i do send put to Api */
+  deletePostJsonPlaceholder(post: Post): void {
+    this.postService.deletePost(post.id).subscribe(obj => {
+      const index = this.dataSource.data.indexOf(post);
+      this.dataSource.data.splice(index, 1);
+      this.dataSource._updateChangeSubscription();
+      this.showSuccessAlert('Post has been delete');
+    });
+  }
 }

@@ -8,7 +8,7 @@ import {SelectionModel} from '@angular/cdk/collections';
 import { MatDialog } from '@angular/material/dialog';
 import {DialogComponent} from '../dialog/dialog.component';
 import { ToastrService } from 'ngx-toastr';
-import {FormGroup, FormControl, Validators, AbstractControl, FormBuilder} from '@angular/forms';
+import {FormGroup, FormControl, Validators, FormBuilder} from '@angular/forms';
 import {Subscription} from 'rxjs';
 
 const auxPost: Post[] = [
@@ -140,20 +140,25 @@ export class TableComponent implements OnInit, OnDestroy  {
     const row = this.postForm.value;
     let msg = '';
     if (this.isEdit){
-      let post = this.selection.selected[0];
-      const newPost = {userId: post.userId, id: post.id, title: row.title, body: row.title};
+      const post = this.selection.selected[0];
+      const newPost = {
+        userId: post.userId,
+        id: post.id,
+        title: row.title,
+        body: row.body
+      };
       if (this.isDisconnectNetwork){
         msg = 'the post has been updated';
         this.dataSource.data[this.dataSource.data.indexOf(post)]  = newPost;
         this.dataSource._updateChangeSubscription();
-        this.showSuccessAlert('the post has been updated');
+        this.showSuccessAlert(msg);
         this.closeForm();
       } else {
-        this.updatePostJsonPlaceholder(newPost);
+        this.updatePostJsonPlaceholder(post, newPost);
       }
     } else {
       const length = (this.dataSource.data.length + 1);
-      const newPost = {userId: 1, id: length, title: row.title, body: row.title};
+      const newPost = {userId: 1, id: length, title: row.title, body: row.body};
       if (this.isDisconnectNetwork){
         this.dataSource.data.push(newPost);
         msg = 'the post has been added';
@@ -180,8 +185,8 @@ export class TableComponent implements OnInit, OnDestroy  {
 
   /** if data is remote, i do send post to Api */
   sendPostJsonPlaceholder(post: Post): void {
-    this.postService.sendPost(post).subscribe(post => {
-        this.dataSource.data.push(post);
+    this.postService.sendPost(post).subscribe(obj => {
+        this.dataSource.data.push(obj);
         this.dataSource._updateChangeSubscription();
         this.showSuccessAlert('the post has been added');
         this.closeForm();
@@ -189,9 +194,9 @@ export class TableComponent implements OnInit, OnDestroy  {
   }
 
   /** if data is remote, i do send put to Api */
-  updatePostJsonPlaceholder(post: Post): void {
-    this.postService.updatePost(post).subscribe(obj => {
-      this.dataSource.data[this.dataSource.data.indexOf(post)]  = obj;
+  updatePostJsonPlaceholder(oldPost: Post, newPost: Post): void {
+    this.postService.updatePost(newPost).subscribe(obj => {
+      this.dataSource.data[this.dataSource.data.indexOf(oldPost)]  = obj;
       this.dataSource._updateChangeSubscription();
       this.showSuccessAlert('the post has been updated');
       this.closeForm();

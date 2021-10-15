@@ -1,5 +1,5 @@
 # Fronted
 
-CRUD SPA en Angular
+CRUD SPA in Angular
 
 

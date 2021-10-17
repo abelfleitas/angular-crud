@@ -2,5 +2,5 @@
 
 Simple CRUD SPA in Angular
 <br/>
-<a  target="_blank" href="https://abelfleitas.github.io/angular-crud/">Demo</a>
+<a href="https://abelfleitas.github.io/angular-crud/" target="_blank" >Demo</a>
 

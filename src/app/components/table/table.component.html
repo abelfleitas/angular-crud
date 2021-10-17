@@ -49,7 +49,7 @@
       <mat-divider [vertical]="true" ></mat-divider>
       <mat-divider [vertical]="true" ></mat-divider>
 
-      <button type="submit" mat-raised-button color="primary" class="btnAction">
+      <button type="submit" [disabled]="!postForm.valid" mat-raised-button color="primary" class="btnAction">
         <mat-icon aria-hidden="false" aria-label="icon save">check</mat-icon>
         Save
       </button>

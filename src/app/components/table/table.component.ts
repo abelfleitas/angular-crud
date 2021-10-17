@@ -32,18 +32,25 @@ export class TableComponent implements OnInit, OnDestroy  {
   addForm: boolean; /** if is the form show or hide */
   isEdit: boolean; /** if option selected wos edit */
   isDisconnectNetwork: boolean;  /** if there is a connection, I charge the data remotely else charge data local. */
-  postForm: FormGroup = this.formBuilder.group( {
-    title: ['', { validators: [Validators.required, Validators.minLength(5)], updateOn: 'change' }],
-    body: ['', { validators: [Validators.required, Validators.minLength(10)], updateOn: 'change' }],
-  });
+  public postForm!: FormGroup;
+
   constructor(
     private postService: PostService,
     public dialog: MatDialog,
     private toastr: ToastrService,
-    private formBuilder: FormBuilder) {
+    private formBuilder: FormBuilder) 
+  {
     this.addForm = false;
     this.isEdit = false;
     this.isDisconnectNetwork = false;
+    this.createForm();
+  }
+
+  createForm(): void {
+    this.postForm = this.formBuilder.group( {
+      title: ['', { validators: [Validators.required, Validators.minLength(5)], updateOn: 'change' }],
+      body: ['', { validators: [Validators.required, Validators.minLength(5)], updateOn: 'change' }],
+    });
   }
 
   ngOnInit(): void {
@@ -70,14 +77,12 @@ export class TableComponent implements OnInit, OnDestroy  {
     this.selection.toggle(row);
   }
 
-  /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected(): boolean {
     const numSelected = this.selection.selected.length;
     const numRows = this.dataSource.data.length;
     return numSelected === numRows;
   }
 
-  /** The label for the checkbox on the passed row */
   checkboxLabel(row?: Post): string {
     if (!row) {
       return `${this.isAllSelected() ? 'select' : 'deselect'} all`;
@@ -85,7 +90,6 @@ export class TableComponent implements OnInit, OnDestroy  {
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
   }
 
-  /** filter */
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();

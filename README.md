@@ -1,5 +1,5 @@
 # Fronted
 
-CRUD SPA in Angular
-
+Simple CRUD SPA in Angular
+<a href="https://abelfleitas.github.io/angular-crud/">Demo</a>
 
